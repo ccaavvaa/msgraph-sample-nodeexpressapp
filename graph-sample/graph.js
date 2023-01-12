@@ -4,8 +4,10 @@
 var graph = require('@microsoft/microsoft-graph-client');
 require('isomorphic-fetch');
 
+const scopes = 'user.read,mailboxsettings.read,mail.read';
+
 module.exports = {
-  getUserDetails: async function(msalClient, userId) {
+  getUserDetails: async function (msalClient, userId) {
     const client = getAuthenticatedClient(msalClient, userId);
 
     const user = await client
@@ -16,7 +18,7 @@ module.exports = {
   },
 
   // <GetCalendarViewSnippet>
-  getCalendarView: async function(msalClient, userId, start, end, timeZone) {
+  getCalendarView: async function (msalClient, userId, start, end, timeZone) {
     const client = getAuthenticatedClient(msalClient, userId);
 
     return client
@@ -36,9 +38,18 @@ module.exports = {
       .top(50)
       .get();
   },
+
+  getMailView: async function (msalClient, userId, id) {
+    const client = getAuthenticatedClient(msalClient, userId);
+    return client.api('/me/messages/' + id).get();
+  },
+  getMailsView: async function (msalClient, userId) {
+    const client = getAuthenticatedClient(msalClient, userId);
+    return client.api('/me/messages').get();
+  },
   // </GetCalendarViewSnippet>
   // <CreateEventSnippet>
-  createEvent: async function(msalClient, userId, formData, timeZone) {
+  createEvent: async function (msalClient, userId, formData, timeZone) {
     const client = getAuthenticatedClient(msalClient, userId);
 
     // Build a Graph event
@@ -101,7 +112,7 @@ function getAuthenticatedClient(msalClient, userId) {
           // Attempt to get the token silently
           // This method uses the token cache and
           // refreshes expired tokens as needed
-          const scopes = process.env.OAUTH_SCOPES || 'https://graph.microsoft.com/.default';
+          // const scopes = process.env.OAUTH_SCOPES || 'https://graph.microsoft.com/.default';
           const response = await msalClient.acquireTokenSilent({
             scopes: scopes.split(','),
             redirectUri: process.env.OAUTH_REDIRECT_URI,

@@ -9,14 +9,14 @@ const logger = require('morgan');
 require('dotenv').config();
 
 const indexRouter = require('./routes/index');
-const usersRouter = require('./routes/users');
 
 const session = require('express-session');
 const flash = require('connect-flash');
 const msal = require('@azure/msal-node');
 
 const authRouter = require('./routes/auth');
-const calendarRouter = require('./routes/calendar');
+const mailRouter = require('./routes/mail');
+
 var app = express();
 // <MsalInitSnippet>
 // In-memory storage of logged-in users
@@ -104,8 +104,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', indexRouter);
 app.use('/auth', authRouter);
-app.use('/calendar', calendarRouter);
-app.use('/users', usersRouter);
+app.use('/mail', mailRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

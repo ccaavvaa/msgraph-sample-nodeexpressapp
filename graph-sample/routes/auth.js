@@ -7,6 +7,8 @@ const router = require('express-promise-router').default();
 /* GET auth callback. */
 router.get('/signin',
   async function (req, res) {
+    const to = req.query?.to;
+    req.session.to = to || '/';
     const scopes = process.env.OAUTH_SCOPES || 'https://graph.microsoft.com/.default';
     const urlParameters = {
       scopes: scopes.split(','),
@@ -31,7 +33,7 @@ router.get('/signin',
 
 // <CallbackSnippet>
 router.get('/callback',
-  async function(req, res) {
+  async function (req, res) {
     const scopes = process.env.OAUTH_SCOPES || 'https://graph.microsoft.com/.default';
     const tokenRequest = {
       code: req.query.code,
@@ -57,20 +59,22 @@ router.get('/callback',
         email: user.mail || user.userPrincipalName,
         timeZone: user.mailboxSettings.timeZone
       };
-    } catch(error) {
+    } catch (error) {
       req.flash('error_msg', {
         message: 'Error completing authentication',
         debug: JSON.stringify(error, Object.getOwnPropertyNames(error))
       });
     }
+    let to = req.session.to || '/';
+    delete req.session.to;
 
-    res.redirect('/');
+    res.redirect(to);
   }
 );
 // </CallbackSnippet>
 
 router.get('/signout',
-  async function(req, res) {
+  async function (req, res) {
     // Sign out
     if (req.session.userId) {
       // Look up the user's account in the cache
